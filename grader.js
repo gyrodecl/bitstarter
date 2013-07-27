@@ -50,6 +50,13 @@ var checkHtmlFile = function(htmlfile, checksfile) {
     var checks = loadChecks(checkfiles).sort();
     var out = {};
     for(var ii in checks) {
+        //checks has all these different html elements we want to test for 
+        //then we look in our html file represented by $
+        //and get the array of all the elements in the html that match
+        //the element we're looking for.  if the length is > 0
+        //it means there's at least 1 of those elements in our index.html
+	//file so we set 'true' to be the value corresponding to the
+        //html property in our out result object
 	var present = $(checks[ii]).length > 0;
 	out[checks[ii]] = present;
     }
@@ -63,8 +70,10 @@ var clone = function(fn) {
 };
 
 //remember that program variable here refers to commander module
+//PROGRAM Starts here!
 if(require.main == module) {
-  program
+       //first check if checks.json and index.html exist
+  program                     
        .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
 	.parse(process.argv);
