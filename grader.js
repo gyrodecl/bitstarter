@@ -32,16 +32,46 @@ var assertFileExists = function(infile) {
        //first check if the file exists in the path--index.html here
     if (!fs.existsSync(instr)) {
        console.log("%s does not exist. Exiting.", instr);
-       process.exit(1):  //check out node process api
+       process.exit(1);  //check out node process api
        }
        return instr;
 };
 
 var cheerioHtmlFile = function(htmlfile) {
     return cheerio.load(fs.readFileSync(htmlfile));
-}
+};
 
 var loadChecks = function(checksfile) {
     return JSON.parse(fs.readFileSync(checksfile));
 };
+
+var checkHtmlFile = function(htmlfile, checksfile) {
+    $ = cheerioHtmlFile(htmlfile);
+    var checks = loadChecks(checkfiles).sort();
+    var out = {};
+    for(var ii in checks) {
+	var present = $(checks[ii]).length > 0;
+	out[checks[ii]] = present;
+    }
+    return out;
+};
+
+var clone = function(fn) {
+   // Workaround for commander.js issue.
+   // http://stackoverflow.com/a/6772648
+  return fn.bind({});
+};
+
+//remember that program variable here refers to commander module
+if(require.main == module) {
+  program
+       .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
+       .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+	.parse(process.argv);
+   var checkJson = checkHtmlFile(program.file, program.checks);
+   var outJson = JSON.stringify(checkJson, null, 40);
+   console.log(outJson);
+}  else {
+   exports.checkHtmlFile = checkHtmlFile;
+}
 
